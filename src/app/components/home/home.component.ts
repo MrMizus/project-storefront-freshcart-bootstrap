@@ -35,7 +35,7 @@ export class HomeComponent {
     return stores.map((store) => ({
       name: store.name,
       logoUrl: store.logoUrl,
-      distanceInMeters: store.distanceInMeters,
+      distanceInMeters: Math.round((store.distanceInMeters * .001) * 10) / 10,
       tags: (store.tagIds ?? []).map((id) => tagMap[id]?.name),
       id: store.id
     }))
