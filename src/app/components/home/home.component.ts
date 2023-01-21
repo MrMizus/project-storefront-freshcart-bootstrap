@@ -35,7 +35,6 @@ export class HomeComponent {
     .pipe(
       map((products) => this._filterSortSliceProducts(products, '2'))
     )
-  readonly test$: Observable<ProductModel[]> = this._productsService.getAllProducts()
 
   constructor(private _categoriesService: CategoriesService, private _storesService: StoresService, private _tagsService: TagsService, private _productsService: ProductsService) {
   }
