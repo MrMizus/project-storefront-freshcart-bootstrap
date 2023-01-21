@@ -1,0 +1,112 @@
+<div class="mt-8 mb-lg-14 mb-8" *ngIf="category$ | async as category">
+  <div class="container">
+    <div class="d-flex gx-10">
+      <aside class="col-lg-3 col-md-4 mb-6 mb-md-0 pl-6 w-25">
+        <div
+          class="ml-4 w-75"
+          tabindex="-1"
+          id="offcanvasCategory"
+          aria-labelledby="offcanvasCategoryLabel"
+        >
+          <div class="s-lg-2 pt-lg-0">
+            <div class="mb-8 w-100">
+              <!-- title -->
+              <h5 class="mb-3">Categories</h5>
+              <!-- nav -->
+              <ul
+                class="nav nav-category"
+                *ngFor="let item of categories$ | async"
+              >
+                <li
+                  class="nav-item border-bottom w-100"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#categoryFlushOne"
+                  aria-expanded="false"
+                  aria-controls="categoryFlushOne"
+                >
+                  <a
+                    role="button"
+                    routerLink="/categories/{{ item.id }}"
+                    class="nav-link"
+                  >
+                    {{ item.name }}
+                    <i class="feather-icon icon-chevron-right"></i
+                  ></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <section class="w-100">
+        <div class="card mb-4 bg-light border-0">
+          <!-- card body -->
+          <div class="card-body p-9">
+            <h2 class="mb-0 fs-1">{{ category.name }}</h2>
+          </div>
+        </div>
+        <div *ngIf="products$ | async as products">
+          <div class="mb-3 mb-lg-0">
+            <p class="mb-0">
+              <span class="text-dark">{{ products.length }} </span> Products
+              found
+            </p>
+          </div>
+          <div class="row g-4 row-cols-1 mt-2">
+            <div class="col">
+              <!-- card -->
+              <div class="card card-product" *ngFor="let product of products">
+                <!-- card body -->
+                <div class="card-body">
+                  <div class="row align-items-center">
+                    <!-- col -->
+                    <div class="col-md-4 col-12">
+                      <div class="text-center position-relative">
+                        <!-- img --><img
+                          src="{{ product.imageUrl }}"
+                          alt="Grocery Ecommerce Template"
+                          class="mb-3 img-fluid"
+                        />
+                      </div>
+                    </div>
+                    <div class="col-md-8 col-12 flex-grow-1">
+                      <!-- heading -->
+                      <div class="text-small mb-1">
+                        <small>{{ category.name }}</small>
+                      </div>
+                      <h2 class="fs-6">{{ product.name }}</h2>
+                      <div>
+                        <!-- rating --><small class="text-warning">
+                          <i
+                            *ngFor="let val of product.ratingOptions"
+                            class="bi"
+                            [ngClass]="{
+                              'bi-star-fill': val === 1,
+                              'bi-star': val === 0,
+                              'bi-star-half': val === 0.5
+                            }"
+                          ></i>
+                        </small>
+                        <span class="text-muted small"
+                          >{{ product.ratingValue }}({{
+                            product.ratingCount
+                          }})</span
+                        >
+                      </div>
+                      <div class="mt-6">
+                        <!-- price -->
+                        <div>
+                          <span class="text-dark">${{ product.price }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

@@ -20,7 +20,7 @@ export class StoreProductsComponent {
   readonly store$: Observable<StoreModel> = this._activatedRoute.params.pipe(switchMap(data => this._storesService.getOneStore(data["storeId"])),
    shareReplay(1));
 
-   readonly startsWith$: Observable<string> = this.search.valueChanges.pipe(
+   readonly defaultSearchValue$: Observable<string> = this.search.valueChanges.pipe(
     map(form => form.searchProduct.toLocaleLowerCase()),
     startWith(''),
     debounceTime(1000)
@@ -30,8 +30,8 @@ export class StoreProductsComponent {
   readonly products$: Observable<ProductModel[]> = combineLatest([
     this.store$,
     this._productsService.getAllProducts(),
-    this.startsWith$
-  ]).pipe(map(([store, produts, startsWith]) => produts.filter((product) => (product.storeIds.includes(store.id) && product.name.toLocaleLowerCase().includes(startsWith)))))
+    this.defaultSearchValue$
+  ]).pipe(map(([store, produts, defaultSearchValue]) => produts.filter((product) => (product.storeIds.includes(store.id) && product.name.toLocaleLowerCase().includes(defaultSearchValue)))))
 
   constructor(private _storesService: StoresService, private _activatedRoute: ActivatedRoute, private _productsService: ProductsService) {
   }
