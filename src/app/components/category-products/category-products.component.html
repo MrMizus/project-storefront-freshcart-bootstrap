@@ -51,10 +51,8 @@
               <div [formGroup]="sort">
                 <!-- select option -->
                 <select class="form-select" formControlName="sortValue">
-                  <option value="" selected="">Featured</option>
-                  <option value="price+">Price: Low to High</option>
-                  <option value="price-">Price: High to Low</option>
-                  <option value="ratingValue">Avg. Rating</option>
+                  <option [ngValue]="" hidden>Featured</option>
+                  <option *ngFor="let item of sortSelection$ | async" [ngValue]="item">{{item.name}}</option>
                 </select>
               </div>
             </div>

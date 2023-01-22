@@ -19,6 +19,7 @@ import { ProductQueryModel } from '../../query-models/product.query-model';
 import { ProductModel } from '../../models/product.model';
 import { ProductsService } from '../../services/products.service';
 import { CategoriesService } from '../../services/categories.service';
+import { SortSelectionModel } from 'src/app/models/sort-selection.model';
 
 @Component({
   selector: 'app-category-products',
@@ -30,13 +31,38 @@ import { CategoriesService } from '../../services/categories.service';
 export class CategoryProductsComponent {
 
   readonly sort: FormGroup = new FormGroup({
-    sortValue: new FormControl('', Validators.required),
+    sortValue: new FormControl('Featured', Validators.required),
   });
 
-  readonly sortValue$: Observable<string> = this.sort.valueChanges.pipe(
+  readonly sortValue$: Observable<SortSelectionModel> = this.sort.valueChanges.pipe(
     map((form) => form.sortValue),
-    startWith('')
+    startWith({
+      name: 'Featured',
+      value: 'featureValue',
+      isDesc: true,
+    })
   );
+
+  readonly sortSelection$: Observable<SortSelectionModel[]> = of([{
+    name: 'Featured',
+    value: 'featureValue',
+    isDesc: true,
+  },
+  {
+    name: 'Price: Low to High',
+    value: 'price',
+    isDesc: false,
+  },
+  {
+    name: 'Price: High to Low',
+    value: 'price',
+    isDesc: true,
+  },{
+    name: 'Avg. Rating',
+    value: 'ratingValue',
+    isDesc: true,
+  }
+]);
 
   private _pageSizeSubject: BehaviorSubject<number> =
     new BehaviorSubject<number>(5);
@@ -65,15 +91,8 @@ export class CategoryProductsComponent {
       this._mapToProductQueryModels(products)
         .filter((product) => product.categoryId === category.id)
         .sort((a, b) => {
-          if (sortValue === 'price-') {
-            return +b.price - +a.price;
-          } else if (sortValue === 'ratingValue') {
-            return +b.ratingValue - +a.ratingValue;
-          } else if (sortValue === 'price+') {
-            return +a.price - +b.price;
-          } else {
-            return +b.featureValue - +a.featureValue;
-          }
+          let value = sortValue.value as keyof ProductQueryModel
+          return sortValue.isDesc ? +b[value] - +a[value] : +a[value] - +b[value]
         })
     )
   );
