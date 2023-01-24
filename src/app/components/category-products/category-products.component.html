@@ -1,7 +1,7 @@
 <div class="mt-8 mb-lg-14 mb-8" *ngIf="category$ | async as category">
   <div class="container" *ngIf="products$ | async as products">
     <div class="d-flex gx-10">
-      <aside class="col-lg-3 col-md-4 mb-6 mb-md-0 pl-6 w-25">
+      <aside class="col-lg-3 col-md-4 mb-6 mb-md-0 pl-6 w-25 p-8">
         <div
           class="ml-4 w-75"
           tabindex="-1"
@@ -31,6 +31,75 @@
             </div>
           </div>
         </div>
+        <div class="my-4 w-75" [formGroup]="filter">
+          <h5 class="mb-3">Price</h5>
+          <!-- input -->
+          <input
+            type="search"
+            formControlName="priceMin"
+            class="form-control mb-4"
+            placeholder="Price From"
+          />
+          <input
+            type="search"
+            formControlName="priceMax"
+            class="form-control"
+            placeholder="Price To"
+          />
+          <div class="my-8">
+            <h5 class="mb-3">Rating</h5>
+          <div>
+            <!-- form check -->
+            <div class="form-check mb-2">
+              <!-- input -->
+              <input class="form-check-input" formControlName="rating" type="radio" name="rating" [value]="5" id="ratingFive">
+              <label class="form-check-label" for="ratingFive">
+                <i class="bi bi-star-fill text-warning"></i>
+                <i class="bi bi-star-fill text-warning "></i>
+                <i class="bi bi-star-fill text-warning "></i>
+                <i class="bi bi-star-fill text-warning "></i>
+                <i class="bi bi-star-fill text-warning "></i>
+              </label>
+            </div>
+            <!-- form check -->
+            <div class="form-check mb-2">
+              <!-- input -->
+              <input class="form-check-input" formControlName="rating" type="radio" [value]="4" name="rating" id="ratingFour" checked="">
+              <label class="form-check-label" for="ratingFour">
+                <i class="bi bi-star-fill text-warning"></i>
+                <i class="bi bi-star-fill text-warning "></i>
+                <i class="bi bi-star-fill text-warning "></i>
+                <i class="bi bi-star-fill text-warning "></i>
+                <i class="bi bi-star text-warning"></i>
+              </label>
+            </div>
+            <!-- form check -->
+            <div class="form-check mb-2">
+              <!-- input -->
+              <input class="form-check-input" formControlName="rating" type="radio" [value]="3" name="rating" id="ratingThree">
+              <label class="form-check-label" for="ratingThree">
+                <i class="bi bi-star-fill text-warning"></i>
+                <i class="bi bi-star-fill text-warning "></i>
+                <i class="bi bi-star-fill text-warning "></i>
+                <i class="bi bi-star text-warning"></i>
+                <i class="bi bi-star text-warning"></i>
+              </label>
+            </div>
+            <!-- form check -->
+            <div class="form-check mb-2">
+              <!-- input -->
+              <input class="form-check-input" formControlName="rating" type="radio" [value]="2" name="rating" value="2" id="ratingTwo">
+              <label class="form-check-label" for="ratingTwo">
+                <i class="bi bi-star-fill text-warning"></i>
+                <i class="bi bi-star-fill text-warning"></i>
+                <i class="bi bi-star text-warning"></i>
+                <i class="bi bi-star text-warning"></i>
+                <i class="bi bi-star text-warning"></i>
+              </label>
+            </div>
+          </div>
+          </div>
+        </div>
       </aside>
       <section class="w-100">
         <div class="card mb-4 bg-light border-0">
@@ -52,7 +121,12 @@
                 <!-- select option -->
                 <select class="form-select" formControlName="sortValue">
                   <option [ngValue]="" hidden>Featured</option>
-                  <option *ngFor="let item of sortSelection$ | async" [ngValue]="item">{{item.name}}</option>
+                  <option
+                    *ngFor="let item of sortSelection$ | async"
+                    [ngValue]="item"
+                  >
+                    {{ item.name }}
+                  </option>
                 </select>
               </div>
             </div>
@@ -115,20 +189,21 @@
             </div>
           </div>
         </div>
-        <nav class="d-flex justify-content-between w-75" [ngClass]="{dnone: products.length === 0}">
+        <nav
+          class="d-flex justify-content-between w-75"
+          [ngClass]="{ dnone: products.length === 0 }"
+        >
           <div>
             <h5>Limit</h5>
             <ul class="pagination" *ngIf="pageSize$ | async as pageSize">
               <li
                 class="page-item"
                 *ngFor="let item of limitSelection$ | async"
-                [ngClass]="{ active: item === pageSize}"
+                [ngClass]="{ active: item === pageSize }"
               >
-                <a
-                  class="page-link"
-                  (click)="onPageSizeChange(item)"
-                  >{{ item }}</a
-                >
+                <a class="page-link" (click)="onPageSizeChange(item)">{{
+                  item
+                }}</a>
               </li>
             </ul>
           </div>
@@ -151,4 +226,3 @@
   </div>
 </div>
 
-<!-- <div *ngIf="test$ | async as test" class="col"> {{test}}</div> -->
