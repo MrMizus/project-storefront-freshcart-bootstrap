@@ -3,7 +3,7 @@
     <div class="d-flex gx-10">
       <aside class="col-lg-3 col-md-4 mb-6 mb-md-0 pl-6 w-25 p-8">
         <div
-          class="ml-4 w-75"
+          class="ml-4 w-100"
           tabindex="-1"
           id="offcanvasCategory"
           aria-labelledby="offcanvasCategoryLabel"
@@ -31,9 +31,31 @@
             </div>
           </div>
         </div>
-        <div class="my-4 w-75" [formGroup]="filter">
+        <div class="my-4 w-100" [formGroup]="filter">
+          <div class="mb-8">
+            <h5 class="mb-3">Stores</h5>
+            <!-- input -->
+            <input
+              type="search"
+              formControlName="storeFilter"
+              class="form-control mb-4"
+              placeholder="Search by store"
+            />
+            <!-- form check -->
+            <div formGroupName="store">
+              <div *ngFor="let store of stores$ | async" class="form-check mb-2">
+                <input
+                  [id]="store.name"
+                  [formControlName]="store.id"
+                  class="form-check-input"
+                  type="checkbox"
+                /><label [for]="store.name" class="form-check-label">{{
+                  store.name
+                }}</label>
+              </div>
+            </div>
+          </div>
           <h5 class="mb-3">Price</h5>
-          <!-- input -->
           <input
             type="search"
             formControlName="priceMin"
@@ -46,58 +68,27 @@
             class="form-control"
             placeholder="Price To"
           />
-          <div class="my-8">
-            <h5 class="mb-3">Rating</h5>
-          <div>
-            <!-- form check -->
-            <div class="form-check mb-2">
-              <!-- input -->
-              <input class="form-check-input" formControlName="rating" type="radio" name="rating" [value]="5" id="ratingFive">
-              <label class="form-check-label" for="ratingFive">
-                <i class="bi bi-star-fill text-warning"></i>
-                <i class="bi bi-star-fill text-warning "></i>
-                <i class="bi bi-star-fill text-warning "></i>
-                <i class="bi bi-star-fill text-warning "></i>
-                <i class="bi bi-star-fill text-warning "></i>
-              </label>
-            </div>
-            <!-- form check -->
-            <div class="form-check mb-2">
-              <!-- input -->
-              <input class="form-check-input" formControlName="rating" type="radio" [value]="4" name="rating" id="ratingFour" checked="">
-              <label class="form-check-label" for="ratingFour">
-                <i class="bi bi-star-fill text-warning"></i>
-                <i class="bi bi-star-fill text-warning "></i>
-                <i class="bi bi-star-fill text-warning "></i>
-                <i class="bi bi-star-fill text-warning "></i>
-                <i class="bi bi-star text-warning"></i>
-              </label>
-            </div>
-            <!-- form check -->
-            <div class="form-check mb-2">
-              <!-- input -->
-              <input class="form-check-input" formControlName="rating" type="radio" [value]="3" name="rating" id="ratingThree">
-              <label class="form-check-label" for="ratingThree">
-                <i class="bi bi-star-fill text-warning"></i>
-                <i class="bi bi-star-fill text-warning "></i>
-                <i class="bi bi-star-fill text-warning "></i>
-                <i class="bi bi-star text-warning"></i>
-                <i class="bi bi-star text-warning"></i>
-              </label>
-            </div>
-            <!-- form check -->
-            <div class="form-check mb-2">
-              <!-- input -->
-              <input class="form-check-input" formControlName="rating" type="radio" [value]="2" name="rating" value="2" id="ratingTwo">
-              <label class="form-check-label" for="ratingTwo">
-                <i class="bi bi-star-fill text-warning"></i>
-                <i class="bi bi-star-fill text-warning"></i>
-                <i class="bi bi-star text-warning"></i>
-                <i class="bi bi-star text-warning"></i>
-                <i class="bi bi-star text-warning"></i>
-              </label>
-            </div>
-          </div>
+
+          <div *ngFor="let star of stars$ | async; let i = index" class="form-check mb-2">
+            <input
+              formControlName="rating"
+              [id]="i"
+              class="form-check-input"
+              type="radio"
+              name="rating"
+              [value]="5-i"
+            /><label [for]="i" class="form-check-label"
+              ><div class="text-warning">
+                <i
+                  *ngFor="let val of star"
+                  class="bi"
+                  [ngClass]="{
+                    'bi-star-fill': val === 1,
+                    'bi-star': val === 0,
+                    'bi-star-half': val === 0.5
+                  }"
+                ></i></div
+            ></label>
           </div>
         </div>
       </aside>
@@ -122,10 +113,10 @@
                 <select class="form-select" formControlName="sortValue">
                   <option [ngValue]="" hidden>Featured</option>
                   <option
-                    *ngFor="let item of sortSelection$ | async"
-                    [ngValue]="item"
+                    *ngFor="let sortSelect of sortSelection$ | async; let first = first"
+                    [ngValue]= "sortSelect"
                   >
-                    {{ item.name }}
+                    {{ sortSelect.name }}
                   </option>
                 </select>
               </div>
@@ -198,11 +189,11 @@
             <ul class="pagination" *ngIf="pageSize$ | async as pageSize">
               <li
                 class="page-item"
-                *ngFor="let item of limitSelection$ | async"
-                [ngClass]="{ active: item === pageSize }"
+                *ngFor="let limit of limitSelection$ | async"
+                [ngClass]="{ active: limit === pageSize }"
               >
-                <a class="page-link" (click)="onPageSizeChange(item)">{{
-                  item
+                <a class="page-link" (click)="onPageSizeChange(limit)">{{
+                  limit
                 }}</a>
               </li>
             </ul>
@@ -210,12 +201,12 @@
           <div>
             <h5>Pragintaion</h5>
             <ul class="pagination" *ngIf="pageNumber$ | async as pageNumber">
-              <li class="page-item" *ngFor="let item of pageSelection$ | async">
+              <li class="page-item" *ngFor="let page of pageSelection$ | async">
                 <a
                   class="page-link"
-                  [ngClass]="{ active: item === pageNumber }"
-                  (click)="onPageNumberChange(item)"
-                  >{{ item }}</a
+                  [ngClass]="{ active: page === pageNumber }"
+                  (click)="onPageNumberChange(page)"
+                  >{{ page }}</a
                 >
               </li>
             </ul>
@@ -225,4 +216,3 @@
     </div>
   </div>
 </div>
-

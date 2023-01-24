@@ -1,14 +1,17 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, Observable, combineLatest, of, pipe } from 'rxjs';
-import { debounceTime, filter, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
+import { debounceTime, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { ProductModel } from '../../models/product.model';
 import { SortSelectionModel } from '../../models/sort-selection.model';
 import { CategoryModel } from '../../models/category.model';
 import { ProductQueryModel } from '../../query-models/product.query-model';
+import { StoreModel } from '../../models/store.model';
 import { ProductsService } from '../../services/products.service';
 import { CategoriesService } from '../../services/categories.service';
+import { StoresService } from '../../services/stores.service';
+
 
 @Component({
   selector: 'app-category-products',
@@ -18,6 +21,10 @@ import { CategoriesService } from '../../services/categories.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoryProductsComponent {
+  test = 'Featured'
+
+  readonly stars$: Observable<number[][]> = of([[1,1,1,1,1],[1,1,1,1,0],[1,1,1,0,0],[1,1,0,0,0]])
+
   readonly productsList$: Observable<ProductModel[]> = this._productsService
     .getAllProducts()
     .pipe(shareReplay(1));
@@ -36,11 +43,13 @@ export class CategoryProductsComponent {
       })
     );
 
+  readonly storeIdForm: FormGroup = new FormGroup({})
+
   readonly filter: FormGroup = new FormGroup({
     priceMin: new FormControl(''),
     priceMax: new FormControl(''),
-    rating: new FormControl(''),
-    store: new FormControl(''),
+    rating: new FormControl(0),
+    store: this.storeIdForm,
     storeFilter: new FormControl(''),
   });
 
@@ -49,27 +58,54 @@ export class CategoryProductsComponent {
     startWith(0),
     debounceTime(1000)
   );
-  readonly priceMax$: Observable<number> = 
+  readonly priceMax$: Observable<number> =
     this.filter.valueChanges
-  .pipe(
-    map((filterValue) => {
-      if (!filterValue.priceMax) {
-        return Infinity;
-      }
-      return filterValue.priceMax;
-    }),
-    startWith(Infinity),
-    debounceTime(1000)
-  );
+      .pipe(
+        map((filterValue) => {
+          if (!filterValue.priceMax) {
+            return Infinity;
+          }
+          return filterValue.priceMax;
+        }),
+        startWith(Infinity),
+        debounceTime(1000)
+      );
 
   readonly rating$: Observable<number> = this.filter.valueChanges.pipe(
-    map((form) => {
-      console.log(form.rating)
-      return form.rating
-    }),
+    map((form) => form.rating),
     startWith(0),
   );
-  // readonly stars$: Observable<number[][]> = of([[1,1,1,1,1],[1,1,1,1,0],[1,1,1,0,0],[1,1,0,0,0]])
+
+  readonly storeFilter$: Observable<string> = this.filter.valueChanges.pipe(
+    map((form) => form.storeFilter),
+    startWith(''),
+  );
+
+  readonly stores$: Observable<StoreModel[]> = 
+  combineLatest([
+    this._storesService.getAllStores().pipe(tap(data => this.setControls(data))),
+    this.storeFilter$
+  ]).pipe(
+    map(([stores, search]) => { 
+      return stores.filter((store) => store.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()))}
+  ),
+  )
+
+
+  readonly store$: Observable<number[]> = this.storeIdForm.valueChanges.pipe(
+    map((value) => {
+      let valueArray: number[] = Object.keys(value).reduce((acc: number[], curr: string) => {
+        if (value[curr]) {
+          return [...acc, +curr]
+        } else {
+          return acc
+        }
+      },[])
+      return valueArray
+    }),
+    startWith([]),
+    shareReplay(1)
+  )
 
   readonly sortSelection$: Observable<SortSelectionModel[]> = of([
     {
@@ -104,13 +140,15 @@ export class CategoryProductsComponent {
     this._pageNumberSubject.asObservable();
 
   readonly categories$: Observable<CategoryModel[]> =
-    this._categoriesService.getAllCategories();
+    this._categoriesService.getAllCategories().pipe(
+      shareReplay(1)
+    );
+
   readonly category$: Observable<CategoryModel> =
     this._activatedRoute.params.pipe(
       switchMap((data) =>
         this._categoriesService.getOneCategory(data['categoryId'])
       ),
-      shareReplay(1)
     );
 
   readonly filtredProducts$: Observable<ProductQueryModel[]> = combineLatest([
@@ -118,15 +156,18 @@ export class CategoryProductsComponent {
     this.category$,
     this.priceMin$,
     this.priceMax$,
-    this.rating$
+    this.rating$,
+    this.store$
   ]).pipe(
-    map(([products, category, priceMin, priceMax, rating]) =>
+    map(([products, category, priceMin, priceMax, rating, storeIds]) =>
       this._mapToProductQueryModels(products)
         .filter((product) => product.categoryId === category.id)
         .filter((product) => {
           return product.price >= priceMin && product.price <= priceMax;
         })
-        .filter((product) => product.ratingValue >= rating)
+        .filter((product) => 
+          product.ratingValue >= rating)
+        .filter((product) =>  storeIds.some(storeId => product.storeIds.includes(`${storeId}`)) || !storeIds.length)
     ),
     shareReplay(1)
   );
@@ -162,7 +203,6 @@ export class CategoryProductsComponent {
       return pagesize;
     })
   );
-
   readonly pageSelection$: Observable<number[]> = combineLatest([
     this.filtredSortedProducts$,
     this.pageSize$,
@@ -180,8 +220,20 @@ export class CategoryProductsComponent {
   constructor(
     private _productsService: ProductsService,
     private _activatedRoute: ActivatedRoute,
-    private _categoriesService: CategoriesService
+    private _categoriesService: CategoriesService, private _storesService: StoresService
   ) { }
+
+  compareByID(first:any, second:any): boolean {
+    return first && second && first.ID === second.ID
+  }
+
+  setControls(stores: StoreModel[]): void {
+    stores.forEach(
+      store => this.storeIdForm.addControl(
+        store.id, new FormControl(false)
+      )
+    )
+  }
 
   onPageNumberChange(limit: number): void {
     this.pageNumber$
@@ -235,8 +287,5 @@ export class CategoryProductsComponent {
         }
       }),
     }));
-  }
-
-  onFilterSubmitted(filter: FormGroup): void {
   }
 }
