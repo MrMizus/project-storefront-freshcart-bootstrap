@@ -1,6 +1,11 @@
+
 # NgFreshcardBootstrapTheme
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.3.3.
+
+## Live
+
+Live version of the project at the link `https://mizus-freshstore-project.netlify.app/`
 
 ## Development server
 
