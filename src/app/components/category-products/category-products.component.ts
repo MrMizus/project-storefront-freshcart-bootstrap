@@ -72,8 +72,8 @@ export class CategoryProductsComponent {
       );
 
   readonly rating$: Observable<number> = this.filter.valueChanges.pipe(
-    map((form) => form.rating),
-    startWith(0),
+    map((form) => Array.isArray(form.rating) ? form.rating.reduce((a:number,c:number) => a+c,0) : 0),
+    startWith(1),
   );
 
   readonly storeFilter$: Observable<string> = this.filter.valueChanges.pipe(
