@@ -176,7 +176,7 @@ export class CategoryProductsComponent {
     combineLatest([this.filtredProducts$, this.sortValue$]).pipe(
       map(([products, sortValue]) => {
         return products.sort((a, b) => {
-          let value = sortValue.value as keyof ProductQueryModel;
+          const value = sortValue.value as keyof ProductQueryModel;
           return sortValue.isDesc
             ? +b[value] - +a[value]
             : +a[value] - +b[value];
