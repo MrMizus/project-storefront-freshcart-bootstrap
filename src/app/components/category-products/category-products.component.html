@@ -1,6 +1,6 @@
 <div class="mt-8 mb-lg-14 mb-8" *ngIf="category$ | async as category">
   <div class="container" *ngIf="products$ | async as products">
-    <div class="d-flex gx-10">
+    <div class="d-flex gx-10" *ngIf="filtredProducts$ | async as filtredProducts">
       <aside class="col-lg-3 col-md-4 mb-6 mb-md-0 pl-6 w-25 p-8">
         <div
           class="ml-4 w-100"
@@ -106,7 +106,7 @@
           <div class="d-md-flex justify-content-between align-items-center">
             <div class="mb-3 mb-lg-0">
               <p class="mb-0">
-                <span class="text-dark">{{ products.length }} </span> Products
+                <span class="text-dark">{{ filtredProducts.length }} </span> Products
                 found
               </p>
             </div>

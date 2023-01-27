@@ -167,7 +167,7 @@ export class CategoryProductsComponent {
         })
         .filter((product) => 
           product.ratingValue >= rating)
-        .filter((product) =>  storeIds.some(storeId => product.storeIds.includes(`${storeId}`)) || !storeIds.length)
+        .filter((product) =>  storeIds.some(storeId => product.storeIds.includes(`${storeId}`)) || !storeIds.length),
     ),
     shareReplay(1)
   );
@@ -196,11 +196,12 @@ export class CategoryProductsComponent {
 
   readonly limitSelection$: Observable<number[]> = this.filtredProducts$.pipe(
     map((products) => {
-      let pagesize: number[] = [];
+      let pageSize: number[] = [];
       for (let i = 5; i <= products.length + 5; i += 5) {
-        pagesize.push(i);
+        pageSize.push(i);
       }
-      return pagesize;
+      if(this._pageSizeSubject.value > products.length) this.onPageSizeChange(pageSize[pageSize.length-1])
+      return pageSize;
     })
   );
   readonly pageSelection$: Observable<number[]> = combineLatest([
